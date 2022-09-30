@@ -116,12 +116,10 @@ const App = () => {
         console.log(position);
 
         //getting the Longitude from the location json        
-        const currentLongitude =
-          JSON.stringify(position.coords.longitude);
+        const currentLongitude = JSON.stringify(position.coords.longitude);
 
         //getting the Latitude from the location json
-        const currentLatitude =
-          JSON.stringify(position.coords.latitude);
+        const currentLatitude = JSON.stringify(position.coords.latitude);
 
         //Setting Longitude state
         setCurrentLongitude(currentLongitude);
