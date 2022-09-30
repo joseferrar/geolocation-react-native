@@ -1,4 +1,4 @@
-package com.testlocapp.newarchitecture;
+package com.profile_app.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.testlocapp.BuildConfig;
-import com.testlocapp.newarchitecture.components.MainComponentsRegistry;
-import com.testlocapp.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.profile_app.BuildConfig;
+import com.profile_app.newarchitecture.components.MainComponentsRegistry;
+import com.profile_app.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

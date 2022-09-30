@@ -1,11 +1,13 @@
 import React, {useState, useRef} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, Button} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker, PROVIDER_DEFAULT} from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
+import database from '@react-native-firebase/database';
 
 const App = () => {
   const GOOGLE_MAPS_APIKEY = 'AIzaSyA5R-ajr7JfuwD4KY_c7Yu3dYHTX3K6ZMg';
+  const [name, setName] = useState();
   const [state, setState] = React.useState({
     pickupCords: {
       latitude: 30.7246,
@@ -28,6 +30,18 @@ const App = () => {
     setInfo(data.coords.latitude);
     console.log(data);
   });
+
+  const handleClick = async () => {
+    database()
+      .ref('/users/123')
+      .set({
+        name: 'Ada Lovelace',
+        age: 31,
+      })
+      .then(() => console.log('Data set.'))
+      .catch(err => console.log(err));
+  };
+  console.log(name);
   return (
     <View style={styles.container}>
       <Text>My App</Text>
@@ -63,6 +77,7 @@ const App = () => {
           coordinate={{latitude: 37.7825259, longitude: -122.4351431}}
           title="Latitude"></Marker> */}
       </MapView>
+      <Button title="Longitude" onPress={handleClick} />
     </View>
   );
 };
