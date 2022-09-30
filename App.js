@@ -7,7 +7,6 @@ import database from '@react-native-firebase/database';
 
 const App = () => {
   const GOOGLE_MAPS_APIKEY = 'AIzaSyA5R-ajr7JfuwD4KY_c7Yu3dYHTX3K6ZMg';
-  const [name, setName] = useState();
   const [state, setState] = React.useState({
     pickupCords: {
       latitude: 30.7246,
@@ -31,17 +30,18 @@ const App = () => {
     console.log(data);
   });
 
-  const handleClick = async () => {
+  const update_current_loc = async () => {
+
+    var user_id = "24"
     database()
-      .ref('/users/123')
+      .ref(`/users_current_location/${user_id}`)
       .set({
-        name: 'Ada Lovelace',
-        age: 31,
+        lat: '30.7246',
+        lng: "76.8229",
       })
       .then(() => console.log('Data set.'))
       .catch(err => console.log(err));
   };
-  console.log(name);
   return (
     <View style={styles.container}>
       <Text>My App</Text>
@@ -73,11 +73,11 @@ const App = () => {
             });
           }}
         />
-        {/* <Marker
+        <Marker
           coordinate={{latitude: 37.7825259, longitude: -122.4351431}}
-          title="Latitude"></Marker> */}
+          title="Latitude"></Marker>
       </MapView>
-      <Button title="Longitude" onPress={handleClick} />
+      <Button title="Longitude" onPress={update_current_loc} />
     </View>
   );
 };
