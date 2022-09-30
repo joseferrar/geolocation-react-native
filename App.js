@@ -31,13 +31,12 @@ const App = () => {
   });
 
   const update_current_loc = async () => {
-
-    var user_id = "24"
+    var user_id = '25';
     database()
       .ref(`/users_current_location/${user_id}`)
       .set({
         lat: '30.7246',
-        lng: "76.8229",
+        lng: '76.8229',
       })
       .then(() => console.log('Data set.'))
       .catch(err => console.log(err));
