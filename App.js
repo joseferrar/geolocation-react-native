@@ -5,7 +5,8 @@ import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import database from '@react-native-firebase/database';
 import { async } from '@firebase/util';
-
+import GetLocation from 'react-native-get-location'
+import Toast from 'react-native-simple-toast';
 const App = () => {
   const GOOGLE_MAPS_APIKEY = 'AIzaSyA5R-ajr7JfuwD4KY_c7Yu3dYHTX3K6ZMg';
   const [state, setState] = React.useState({
@@ -32,16 +33,35 @@ const App = () => {
   const mapRef = useRef();
   const { pickupCords, droplocationCords } = state;
 
-  const [info, setInfo] = React.useState(0);
-
-  // Geolocation.getCurrentPosition(data => {
-  //   setInfo(data.coords.latitude);
-  //   console.log(data);
-  // });
+  Geolocation.getCurrentPosition(data => {
+    console.log(data);
+  });
 
   const [currentLongitude, setCurrentLongitude] = useState('...');
   const [currentLatitude, setCurrentLatitude] = useState('...');
   const [locationStatus, setLocationStatus] = useState('');
+
+  // GetLocation.getCurrentPosition({
+  //   enableHighAccuracy: true,
+  //   timeout: 15000,
+  // })
+  //   .then(location => {
+  //     console.log("GetLocation", location);
+  //   })
+  //   .catch(error => {
+  //     const { code, message } = error;
+  //     console.log(code, message);
+  //   })
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      subscribeLocationLocation();
+
+      console.log("called")
+    }, 6000);
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     const requestLocationPermission = async () => {
@@ -95,6 +115,7 @@ const App = () => {
 
         //Setting Longitude state
         setCurrentLatitude(currentLatitude);
+        update_current_loc()
       },
       (error) => {
         setLocationStatus(error.message);
@@ -114,6 +135,8 @@ const App = () => {
 
         setLocationStatus('You are Here');
         console.log(position);
+
+        console.log("position", position)
 
         //getting the Longitude from the location json        
         const currentLongitude = JSON.stringify(position.coords.longitude);
@@ -152,7 +175,10 @@ const App = () => {
           lng: currentLongitude,
         }
       })
-      .then(() => console.log('Data set.'))
+      .then(() => {
+        // console.log('Data set.')
+        Toast.show('Location Update 👋');
+      })
       .catch(err => console.log(err));
   };
 
@@ -160,38 +186,41 @@ const App = () => {
     <View style={styles.container}>
       <Text>My App</Text>
       {/* <Text>My Location - {info}</Text> */}
-      <MapView
-        ref={mapRef}
-        showsUserLocation={true}
-        provider={PROVIDER_DEFAULT}
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={initial_Region}>
-        <Marker coordinate={initial_Region} title="start" />
-        {/*  <Marker coordinate={droplocationCords} title="destination" /> */}
+      {/* <MapView
+          ref={mapRef}
+          showsUserLocation={true}
+          provider={PROVIDER_DEFAULT}
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={initial_Region}>
+          <Marker coordinate={initial_Region} title="start" />
 
-        <MapViewDirections
-          origin={pickupCords}
-          destination={droplocationCords}
-          apikey={GOOGLE_MAPS_APIKEY}
-          strokeWidth={3}
-          strokeColor="hotpink"
-          optimizeWaypoints={true}
-          onReady={result => {
-            mapRef.current.fitToCoordinates(result.coordinates, {
-              edgePadding: {
-                right: 30,
-                bottom: 300,
-                left: 30,
-                top: 100,
-              },
-            });
-          }}
-        />
-        {/* <Marker
-          coordinate={{ latitude: 37.7825259, longitude: -122.4351431 }}
-          title="Latitude"></Marker> */}
-      </MapView>
+          <MapViewDirections
+            origin={pickupCords}
+            destination={droplocationCords}
+            apikey={GOOGLE_MAPS_APIKEY}
+            strokeWidth={3}
+            strokeColor="hotpink"
+            optimizeWaypoints={true}
+            onReady={result => {
+              mapRef.current.fitToCoordinates(result.coordinates, {
+                edgePadding: {
+                  right: 30,
+                  bottom: 300,
+                  left: 30,
+                  top: 100,
+                },
+              });
+            }}
+          />
+        </MapView> */}
+
       <Button title="Longitude" onPress={update_current_loc} />
+      <View style={{ marginTop: 20 }}>
+        <Button
+          title="check current loc"
+          onPress={getOneTimeLocation}
+        />
+      </View>
     </View>
   );
 };
