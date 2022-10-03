@@ -8,6 +8,7 @@ import { async } from '@firebase/util';
 import GetLocation from 'react-native-get-location'
 import Toast from 'react-native-simple-toast';
 const App = () => {
+  const user_id = "24"
   const GOOGLE_MAPS_APIKEY = 'AIzaSyA5R-ajr7JfuwD4KY_c7Yu3dYHTX3K6ZMg';
   const [state, setState] = React.useState({
     pickupCords: {
@@ -32,63 +33,47 @@ const App = () => {
   }
   const mapRef = useRef();
   const { pickupCords, droplocationCords } = state;
-
-  Geolocation.getCurrentPosition(data => {
-    console.log(data);
-  });
-
-  const [currentLongitude, setCurrentLongitude] = useState('...');
-  const [currentLatitude, setCurrentLatitude] = useState('...');
+  const [current_Longitude, setCurrentLongitude] = useState('...');
+  const [current_Latitude, setCurrentLatitude] = useState('...');
   const [locationStatus, setLocationStatus] = useState('');
-
-  // GetLocation.getCurrentPosition({
-  //   enableHighAccuracy: true,
-  //   timeout: 15000,
-  // })
-  //   .then(location => {
-  //     console.log("GetLocation", location);
-  //   })
-  //   .catch(error => {
-  //     const { code, message } = error;
-  //     console.log(code, message);
-  //   })
 
 
   useEffect(() => {
     const interval = setInterval(() => {
-      subscribeLocationLocation();
-
-      console.log("called")
+      requestLocationPermission();
+      console.log("Interval called")
     }, 6000);
     return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    const requestLocationPermission = async () => {
-      if (Platform.OS === 'ios') {
-        getOneTimeLocation();
-        subscribeLocationLocation();
-      } else {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              title: 'Location Access Required',
-              message: 'This App needs to Access your location',
-            },
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            //To Check, If Permission is granted
-            getOneTimeLocation();
-            subscribeLocationLocation();
-          } else {
-            setLocationStatus('Permission Denied');
-          }
-        } catch (err) {
-          console.warn(err);
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      getOneTimeLocation();
+      subscribeLocationLocation();
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This App needs to Access your location',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+
+          getOneTimeLocation();
+          subscribeLocationLocation();
+        } else {
+          setLocationStatus('Permission Denied');
         }
+      } catch (err) {
+        console.warn(err);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
+
     requestLocationPermission();
     return () => {
       Geolocation.clearWatch(watchID);
@@ -98,24 +83,13 @@ const App = () => {
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');
     Geolocation.getCurrentPosition(
-      //Will give you the current location
-      (position) => {
+      async (position) => {
         setLocationStatus('You are Here');
-
-        //getting the Longitude from the location json
-        const currentLongitude =
-          JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
-        const currentLatitude =
-          JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
+        const currentLongitude = JSON.stringify(position.coords.longitude);
+        const currentLatitude = JSON.stringify(position.coords.latitude);
         setCurrentLongitude(currentLongitude);
-
-        //Setting Longitude state
         setCurrentLatitude(currentLatitude);
-        update_current_loc()
+        update_current_loc(currentLatitude, currentLongitude);
       },
       (error) => {
         setLocationStatus(error.message);
@@ -131,26 +105,12 @@ const App = () => {
   const subscribeLocationLocation = () => {
     watchID = Geolocation.watchPosition(
       async (position) => {
-        //Will give you the location on location change
-
         setLocationStatus('You are Here');
-        console.log(position);
-
-        console.log("position", position)
-
-        //getting the Longitude from the location json        
         const currentLongitude = JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
         const currentLatitude = JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
         setCurrentLongitude(currentLongitude);
-
-        //Setting Latitude state
         setCurrentLatitude(currentLatitude);
-
-        update_current_loc();
+        update_current_loc(currentLatitude, currentLongitude);
       },
       (error) => {
         setLocationStatus(error.message);
@@ -164,19 +124,18 @@ const App = () => {
 
 
 
-  const update_current_loc = async () => {
-    var user_id = "24"
+  const update_current_loc = async (c_lat, c_lng) => {
     database()
       .ref(`/users_current_location/user_id: ${user_id}`)
       .set({
         user_name: "Jose",
         coor: {
-          lat: currentLatitude,
-          lng: currentLongitude,
+          lat: c_lat,
+          lng: c_lng,
         }
       })
       .then(() => {
-        // console.log('Data set.')
+
         Toast.show('Location Update 👋');
       })
       .catch(err => console.log(err));
@@ -184,8 +143,12 @@ const App = () => {
 
   return (
     <View style={styles.container}>
-      <Text>My App</Text>
-      {/* <Text>My Location - {info}</Text> */}
+      <View style={{ alignItems: "flex-start" }}>
+        <Text>Location Status: {locationStatus}</Text>
+        <Text>current Location: {current_Latitude}, {current_Longitude}</Text>
+
+      </View>
+
       {/* <MapView
           ref={mapRef}
           showsUserLocation={true}
@@ -214,7 +177,6 @@ const App = () => {
           />
         </MapView> */}
 
-      <Button title="Longitude" onPress={update_current_loc} />
       <View style={{ marginTop: 20 }}>
         <Button
           title="check current loc"
